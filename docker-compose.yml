@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: deadline
+      POSTGRES_PASSWORD: deadline
+      POSTGRES_DB: deadline_zero
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U deadline -d deadline_zero"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  app:
+    build: .
+    environment:
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: postgres://deadline:deadline@db:5432/deadline_zero
+      AUTH_MODE: development
+      DEV_BEARER_TOKEN: ${DEV_BEARER_TOKEN:?Set a long random local demo token}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  postgres_data:

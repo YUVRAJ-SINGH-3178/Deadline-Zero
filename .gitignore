@@ -1,0 +1,10 @@
+node_modules/
+.npm-cache/
+dist/
+apps/mcp-app/build/
+.env
+.env.*
+!.env.example
+coverage/
+*.log
+.alexa-ai/
