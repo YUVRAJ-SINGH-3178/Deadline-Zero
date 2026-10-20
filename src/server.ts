@@ -22,6 +22,7 @@ const env = z
     HOST: z.string().default("127.0.0.1"),
     PORT: z.coerce.number().int().min(1).max(65535).default(3000),
     MCP_BASE_URL: z.string().url().default("http://localhost:3000/mcp"),
+    PUBLIC_BASE_URL: z.string().url().optional(),
     DATABASE_URL: z.string().optional(),
     AUTH_MODE: z.enum(["development", "oauth"]).default("development"),
     DEV_BEARER_TOKEN: z.string().min(16).default("local-deadline-zero-token"),
@@ -76,7 +77,73 @@ await app.register(rateLimit, {
   }),
 });
 
-app.get("/health", async () => ({ status: "ok", service: "deadline-zero" }));
+const publicBaseUrl = (
+  env.PUBLIC_BASE_URL ?? env.MCP_BASE_URL.replace(/\/mcp$/, "")
+).replace(/\/$/, "");
+const page = (title: string, body: string) => `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title} | Deadline Zero</title><style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#07102d;color:#eff4ff}body{max-width:760px;margin:0 auto;padding:48px 24px;line-height:1.6}h1{line-height:1.15}a{color:#9dc4ff}.tag{color:#99f6e4;font-weight:700}footer{margin-top:48px;color:#a7b3cf;font-size:.9rem}
+</style></head><body><p class="tag">Deadline Zero</p><main>${body}</main><footer><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/health">Service status</a></footer></body></html>`;
+app.get("/", async (_req, reply) =>
+  reply
+    .type("text/html; charset=utf-8")
+    .send(
+      page(
+        "Adaptive planning for Alexa+",
+        `<h1>Turn chaos into a plan that adapts.</h1><p>Deadline Zero turns spoken tasks into an actionable schedule and reshapes it when priorities change.</p><p>Use it with Alexa+ to capture tasks, see your next best action, and keep moving toward your deadlines.</p>`,
+      ),
+    ),
+);
+app.get("/privacy", async (_req, reply) =>
+  reply
+    .type("text/html; charset=utf-8")
+    .send(
+      page(
+        "Privacy Policy",
+        `<h1>Privacy Policy</h1><p>Deadline Zero stores the task details, scheduling preferences, plan history, and focus-session information needed to provide your planning experience.</p><p>Data is associated with the account authorized by your access token. It is used only to operate and improve your current planning experience. We do not sell personal data.</p><p>You can ask Deadline Zero to delete your data. The service clears active planning data and keeps only a minimal deletion marker needed to prevent stale requests from restoring it. Production backups follow the retention period configured by the service operator.</p><p>For privacy questions, contact the service operator through the support address published with this add-on.</p>`,
+      ),
+    ),
+);
+app.get("/terms", async (_req, reply) =>
+  reply
+    .type("text/html; charset=utf-8")
+    .send(
+      page(
+        "Terms of Use",
+        `<h1>Terms of Use</h1><p>Deadline Zero provides task-planning suggestions. You remain responsible for your deadlines, commitments, and decisions.</p><p>Use the service lawfully and do not attempt to disrupt it or access another person’s data. The service may change or be unavailable while it is being improved.</p><p>These terms are governed by the laws applicable to the service operator’s location, subject to mandatory consumer protections.</p>`,
+      ),
+    ),
+);
+const storeAssetNames = new Set([
+  "icon-64x64.png",
+  "icon-72x72.png",
+  "icon-88x88.png",
+  "icon-126x126.png",
+  "icon-180x180.png",
+  "icon-241x241.png",
+  "carousel-600x900.png",
+]);
+app.get("/assets/store/:file", async (req, reply) => {
+  const file = (req.params as { file: string }).file;
+  if (!storeAssetNames.has(file))
+    return reply.code(404).send({ error: "Not found" });
+  try {
+    return reply
+      .header("cache-control", "public, max-age=31536000, immutable")
+      .type("image/png")
+      .send(readFileSync(resolve(process.cwd(), "assets", "store", file)));
+  } catch {
+    return reply
+      .code(503)
+      .send({ error: "Store assets are unavailable. Run npm run assets." });
+  }
+});
+app.get("/health", async () => ({
+  status: "ok",
+  service: "deadline-zero",
+  publicBaseUrl,
+}));
 app.get("/ready", async (_req, reply) => {
   if (pool) {
     try {

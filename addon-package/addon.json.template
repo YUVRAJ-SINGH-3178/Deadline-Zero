@@ -1,0 +1,54 @@
+{
+  "manifestVersion": "1.0",
+  "storeListing": {
+    "distributionCountries": ["US"],
+    "locales": {
+      "en-US": {
+        "default": "DEFAULT",
+        "name": { "value": "Deadline Zero" },
+        "shortDescription": "Turn a busy day into a practical plan that adapts when priorities change.",
+        "fullDescription": "Deadline Zero helps you capture tasks, make a realistic plan, and adapt it when your day changes. Tell Alexa what needs doing, see the next best action, and keep moving toward your deadlines.",
+        "examplePhrases": [
+          "Ask Deadline Zero to plan my study tasks for this week",
+          "Ask Deadline Zero what I should work on next",
+          "Ask Deadline Zero to move my presentation task to tomorrow"
+        ],
+        "privacyAndCompliance": {
+          "privacyPolicyUrl": "https://YOUR_PUBLIC_HOST/privacy",
+          "termsOfUseUrl": "https://YOUR_PUBLIC_HOST/terms"
+        },
+        "mediaAssets": {
+          "icons": {
+            "light": [
+              { "size": "64x64", "uri": "https://YOUR_PUBLIC_HOST/assets/store/icon-64x64.png" },
+              { "size": "72x72", "uri": "https://YOUR_PUBLIC_HOST/assets/store/icon-72x72.png" },
+              { "size": "88x88", "uri": "https://YOUR_PUBLIC_HOST/assets/store/icon-88x88.png" },
+              { "size": "126x126", "uri": "https://YOUR_PUBLIC_HOST/assets/store/icon-126x126.png" },
+              { "size": "180x180", "uri": "https://YOUR_PUBLIC_HOST/assets/store/icon-180x180.png" },
+              { "size": "241x241", "uri": "https://YOUR_PUBLIC_HOST/assets/store/icon-241x241.png" }
+            ],
+            "dark": []
+          },
+          "carouselImages": [
+            {
+              "uri": "https://YOUR_PUBLIC_HOST/assets/store/carousel-600x900.png",
+              "altText": "Deadline Zero shows an adaptive task plan with the next best action.",
+              "size": "600x900"
+            }
+          ],
+          "bannerImages": []
+        }
+      }
+    }
+  },
+  "integrations": [
+    {
+      "type": "MCP",
+      "config": {
+        "endpoints": {
+          "default": { "type": "HTTPS", "uri": "https://YOUR_PUBLIC_HOST/mcp" }
+        }
+      }
+    }
+  ]
+}

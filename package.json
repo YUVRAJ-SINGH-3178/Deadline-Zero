@@ -8,6 +8,7 @@
     "dev": "node --env-file-if-exists=.env --import tsx --watch src/server.ts",
     "build": "npm run build:ui && tsc -p tsconfig.json",
     "build:ui": "tsx scripts/build-ui.ts",
+    "assets": "tsx scripts/generate-store-assets.ts",
     "start": "node dist/src/server.js",
     "test": "vitest run",
     "test:watch": "vitest",

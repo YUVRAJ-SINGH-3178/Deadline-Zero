@@ -4,6 +4,16 @@
 
 This repository contains a deterministic planning service exposed over MCP Streamable HTTP, a screen-oriented plan view, Postgres persistence, and a local development mode. Alexa+ suits the experience because a person can describe a chaotic evening conversationally, then glance at a schedule or keep using voice alone. Account linking and publication still require external developer access; see [ALEXA_PLUS.md](docs/ALEXA_PLUS.md).
 
+## Alexa+ submission package
+
+The repository now includes a zero-cost, source-controlled submission package:
+
+- `addon-package/addon.json.template` with the store copy, three voice phrases, MCP endpoint declaration, privacy/terms URLs, and every required media slot.
+- `assets/store/` with all six required PNG icon sizes and a 600×900 carousel image. Regenerate them with `npm run assets`.
+- First-party public routes: `/`, `/privacy`, `/terms`, and `/assets/store/*`. They become valid HTTPS listing URLs after deployment.
+
+Before using the manifest, replace every `YOUR_PUBLIC_HOST` value with the deployed HTTPS hostname. The Alexa AI CLI must generate the final package and authenticate using your Amazon developer account; see [ALEXA_PLUS.md](docs/ALEXA_PLUS.md).
+
 ## Run locally
 
 Requires Node.js 22+ and npm. Set `DEV_BEARER_TOKEN` to a random value of at least 16 characters for Docker use.
