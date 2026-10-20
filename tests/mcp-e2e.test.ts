@@ -84,6 +84,28 @@ afterAll(() => {
 });
 
 describe("MCP Streamable HTTP end-to-end", () => {
+  it("serves public store listing pages and valid PNG media without authentication", async () => {
+    const [home, privacy, terms, icon, carousel] = await Promise.all([
+      fetch(`${base}/`),
+      fetch(`${base}/privacy`),
+      fetch(`${base}/terms`),
+      fetch(`${base}/assets/store/icon-64x64.png`),
+      fetch(`${base}/assets/store/carousel-600x900.png`),
+    ]);
+    expect(home.status).toBe(200);
+    expect(await home.text()).toContain("Turn chaos into a plan");
+    expect(privacy.status).toBe(200);
+    expect(await privacy.text()).toContain("Privacy Policy");
+    expect(terms.status).toBe(200);
+    expect(await terms.text()).toContain("Terms of Use");
+    for (const image of [icon, carousel]) {
+      expect(image.status).toBe(200);
+      expect(image.headers.get("content-type")).toContain("image/png");
+      expect(Buffer.from(await image.arrayBuffer()).subarray(0, 8)).toEqual(
+        Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+      );
+    }
+  });
   it("initializes, lists useful tools, and supports task capture through a real MCP call", async () => {
     const init = await rpc("initialize", {
       protocolVersion: "2025-03-26",
