@@ -115,6 +115,19 @@ app.get("/terms", async (_req, reply) =>
       ),
     ),
 );
+const simulatorHtml = (() => {
+  try {
+    return readFileSync(
+      resolve(process.cwd(), "apps/simulator/build/index.html"),
+      "utf8",
+    );
+  } catch {
+    return "<!doctype html><html><body><main><h1>Deadline Zero local simulation</h1><p>Run npm run build before opening this page.</p></main></body></html>";
+  }
+})();
+app.get("/demo", async (_req, reply) =>
+  reply.type("text/html; charset=utf-8").send(simulatorHtml),
+);
 const storeAssetNames = new Set([
   "icon-64x64.png",
   "icon-72x72.png",

@@ -16,6 +16,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/apps/mcp-app/build ./apps/mcp-app/build
+COPY --from=build /app/apps/simulator/build ./apps/simulator/build
 COPY --from=build /app/assets ./assets
 COPY db ./db
 USER node

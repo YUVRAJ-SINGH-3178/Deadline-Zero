@@ -2,7 +2,9 @@
 
 **Turn chaos into a plan that adapts.** Deadline Zero turns conversational task details into a practical schedule, then reshapes it when life changes.
 
-This repository contains a deterministic planning service exposed over MCP Streamable HTTP, a screen-oriented plan view, Postgres persistence, and a local development mode. Alexa+ suits the experience because a person can describe a chaotic evening conversationally, then glance at a schedule or keep using voice alone. Account linking and publication still require external developer access; see [ALEXA_PLUS.md](docs/ALEXA_PLUS.md).
+This repository contains a deterministic planning service exposed over MCP Streamable HTTP, a screen-oriented plan view, Postgres persistence, and a local development mode. Alexa+ suits the experience because a person can describe a chaotic evening conversationally, then glance at a schedule or keep using voice alone.
+
+For the Amazon Developer Hackathon, use the local browser simulator at `/demo`. It is a real MCP client that calls this server over Streamable HTTP using protocol `2025-11-25`; it is explicitly labeled as a local Alexa+ simulation.
 
 ## Alexa+ submission package
 
@@ -23,6 +25,8 @@ Copy-Item .env.example .env
 npm install
 npm run dev
 ```
+
+Open `http://localhost:3000/demo`, enter `local-deadline-zero-token` (or the value of `DEV_BEARER_TOKEN` in `.env`), then select **Connect**. The guided controls create a working, recordable demonstration using real `initialize`, `tools/list`, and `tools/call` requests.
 
 The local endpoint is `http://localhost:3000/mcp`. For a self-contained local flow, set `AUTH_MODE=development` and send `Authorization: Bearer local-deadline-zero-token`. This path is rejected in production.
 
@@ -51,5 +55,7 @@ npm run bench:mcp
 ```
 
 See [TESTING.md](docs/TESTING.md), [DEPLOYMENT.md](docs/DEPLOYMENT.md), and [FINAL_STATUS.md](docs/FINAL_STATUS.md) for actual readiness boundaries.
+
+For recording and Devpost submission, follow [HACKATHON_READY.md](docs/HACKATHON_READY.md).
 
 Environment variable reference: [CONFIGURATION.md](docs/CONFIGURATION.md).

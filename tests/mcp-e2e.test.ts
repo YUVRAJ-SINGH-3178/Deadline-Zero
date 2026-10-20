@@ -15,7 +15,7 @@ async function rpc(method: string, params?: unknown, requestId?: number) {
       "content-type": "application/json",
       accept: "application/json, text/event-stream",
       authorization: `Bearer ${token}`,
-      "mcp-protocol-version": "2025-03-26",
+      "mcp-protocol-version": "2025-11-25",
     },
     body: JSON.stringify({
       jsonrpc: "2.0",
@@ -85,10 +85,11 @@ afterAll(() => {
 
 describe("MCP Streamable HTTP end-to-end", () => {
   it("serves public store listing pages and valid PNG media without authentication", async () => {
-    const [home, privacy, terms, icon, carousel] = await Promise.all([
+    const [home, privacy, terms, demo, icon, carousel] = await Promise.all([
       fetch(`${base}/`),
       fetch(`${base}/privacy`),
       fetch(`${base}/terms`),
+      fetch(`${base}/demo`),
       fetch(`${base}/assets/store/icon-64x64.png`),
       fetch(`${base}/assets/store/carousel-600x900.png`),
     ]);
@@ -98,6 +99,8 @@ describe("MCP Streamable HTTP end-to-end", () => {
     expect(await privacy.text()).toContain("Privacy Policy");
     expect(terms.status).toBe(200);
     expect(await terms.text()).toContain("Terms of Use");
+    expect(demo.status).toBe(200);
+    expect(await demo.text()).toContain("LOCAL ALEXA+ MCP SIMULATION");
     for (const image of [icon, carousel]) {
       expect(image.status).toBe(200);
       expect(image.headers.get("content-type")).toContain("image/png");
@@ -108,12 +111,15 @@ describe("MCP Streamable HTTP end-to-end", () => {
   });
   it("initializes, lists useful tools, and supports task capture through a real MCP call", async () => {
     const init = await rpc("initialize", {
-      protocolVersion: "2025-03-26",
+      protocolVersion: "2025-11-25",
       capabilities: {},
       clientInfo: { name: "deadline-zero-test", version: "1.0.0" },
     });
     expect(init.status).toBe(200);
     expect(init.body.result).toBeDefined();
+    expect(
+      (init.body.result as { protocolVersion?: string }).protocolVersion,
+    ).toBe("2025-11-25");
     const listed = await rpc("tools/list");
     expect(listed.status).toBe(200);
     expect(listed.body.result?.tools).toHaveLength(13);

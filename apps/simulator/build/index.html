@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Deadline Zero | Local MCP Simulation</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      "use strict";
+      (() => {
+        var b = document.createElement("style");
+        b.textContent = `:root {
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  color: #eef3ff;
+  background: #071128;
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 85% 0, #312b76 0, transparent 32rem), #071128;
+}
+#app {
+  width: min(1120px, calc(100% - 32px));
+  margin: auto;
+  padding: 56px 0;
+}
+header {
+  margin-bottom: 28px;
+}
+.eyebrow {
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  color: #99f6e4;
+  font-weight: 800;
+}
+h1 {
+  font-size: clamp(2.6rem, 8vw, 5.6rem);
+  line-height: 0.9;
+  margin: 0.5rem 0;
+}
+h1 i {
+  color: #9da8ff;
+  font-style: normal;
+}
+h2 {
+  font-size: 1.15rem;
+  margin: 0 0 0.5rem;
+}
+p {
+  color: #b8c5df;
+  line-height: 1.55;
+}
+.card {
+  background: #0f1d3dce;
+  border: 1px solid #30446f;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 24px 80px #02061755;
+}
+.connect {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+.fields {
+  display: grid;
+  gap: 12px;
+}
+label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #cbd8f4;
+}
+input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  border: 1px solid #40577f;
+  border-radius: 10px;
+  background: #08142e;
+  color: white;
+  padding: 11px;
+  font: inherit;
+}
+.status {
+  margin: 0;
+  font-size: 0.9rem;
+}
+.status.ready {
+  color: #99f6e4;
+}
+.status.error {
+  color: #ffb4a7;
+}
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.controls button {
+  display: block;
+  width: 100%;
+  margin: 11px 0;
+  text-align: left;
+}
+.controls button:last-child {
+  margin-bottom: 0;
+}
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 13px 15px;
+  background: #a5b4fc;
+  color: #10142c;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  transition:
+    transform 0.18s,
+    opacity 0.18s;
+}
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.secondary {
+  background: transparent;
+  color: #d6e1ff;
+  border: 1px solid #5973a5;
+}
+.plan-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.plan-heading p {
+  margin: 0.2rem 0;
+}
+.risk {
+  height: max-content;
+  border-radius: 99px;
+  background: #94f7d4;
+  color: #052319;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+.risk.high {
+  background: #ffc0b3;
+  color: #3a100a;
+}
+.risk.medium {
+  background: #fde68a;
+  color: #3f2e00;
+}
+ol {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+#schedule li {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 12px;
+  padding: 16px 0;
+  border-top: 1px solid #2c4168;
+}
+#schedule time {
+  font-weight: 800;
+  color: #a5b4fc;
+}
+#schedule span {
+  display: block;
+  color: #99a9c9;
+  font-size: 0.85rem;
+  margin-top: 3px;
+}
+.empty {
+  color: #99a9c9;
+}
+.trace {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 24px;
+}
+.trace ol {
+  margin: 0;
+  max-height: 260px;
+  overflow: auto;
+}
+.trace li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 0;
+  border-bottom: 1px solid #283c60;
+  font-size: 0.84rem;
+}
+.trace li span {
+  color: #afbdd7;
+  text-align: right;
+}
+.trace li.failure strong {
+  color: #ffb4a7;
+}
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #c4b5fd;
+}
+footer {
+  margin: 32px 0;
+  color: #8292b5;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+@media (max-width: 760px) {
+  #app {
+    padding: 30px 0;
+  }
+  .connect,
+  .workspace,
+  .trace {
+    grid-template-columns: 1fr;
+  }
+  .plan-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  #schedule li {
+    grid-template-columns: 82px 1fr;
+  }
+}
+`;
+        document.head.appendChild(b);
+        var v = document.querySelector("#app");
+        v.innerHTML = `
+  <header><div class="eyebrow">LOCAL ALEXA+ MCP SIMULATION</div><h1>Deadline <i>Zero</i></h1><p>Turn chaos into a plan that adapts.</p></header>
+  <section class="connect card"><div><h2>Connect to your local MCP server</h2><p>This browser page sends real <code>initialize</code>, <code>tools/list</code>, and <code>tools/call</code> requests over Streamable HTTP.</p></div><div class="fields"><label>MCP endpoint<input id="endpoint" value="/mcp" inputmode="url" /></label><label>Development bearer token<input id="token" type="password" placeholder="Paste DEV_BEARER_TOKEN from .env" /></label><button id="connect">Connect</button></div><p id="connection" class="status">Not connected</p></section>
+  <section class="workspace"><div class="card controls"><h2>Demo controls</h2><p>Use the guided flow below to create an authentic, recordable MCP demonstration.</p><button id="seed" disabled>1. Capture demo tasks and make a plan</button><button id="replan" disabled>2. Add an interruption and replan</button><button id="simulate" disabled>3. Preview skipping a task</button><button id="complete" disabled>4. Complete work and show progress</button><button id="refresh" class="secondary" disabled>Refresh current plan</button></div><div class="card plan"><div class="plan-heading"><div><h2>Your adaptive plan</h2><p id="summary">Connect to begin.</p></div><span id="risk" class="risk">WAITING</span></div><ol id="schedule"><li class="empty">No plan yet.</li></ol></div></section>
+  <section class="card trace"><div><h2>Live MCP trace</h2><p>Each entry below is a real request made by this page to the local server.</p></div><ol id="trace"></ol></section>
+  <footer>Deadline Zero is an independent local simulation built for the Amazon Developer Hackathon. It is not the Alexa+ product or an Alexa certification claim.</footer>`;
+        var C = document.querySelector("#endpoint"),
+          x = document.querySelector("#token"),
+          E = document.querySelector("#connect"),
+          u = document.querySelector("#connection"),
+          a = document.querySelector("#summary"),
+          y = document.querySelector("#risk"),
+          m = document.querySelector("#schedule"),
+          S = document.querySelector("#trace"),
+          L = ["seed", "replan", "simulate", "complete", "refresh"].map((n) =>
+            document.querySelector(`#${n}`),
+          ),
+          T = 0,
+          p = [],
+          k = !1;
+        function w(n, t, o = !0) {
+          let e = document.createElement("li"),
+            r = document.createElement("strong");
+          r.textContent = n;
+          let i = document.createElement("span");
+          ((i.textContent = t),
+            (e.className = o ? "success" : "failure"),
+            e.append(r, i),
+            S.prepend(e));
+        }
+        async function g(n, t) {
+          let o = {
+            "content-type": "application/json",
+            accept: "application/json, text/event-stream",
+            "mcp-protocol-version": "2025-11-25",
+          };
+          x.value.trim() && (o.authorization = `Bearer ${x.value.trim()}`);
+          let e = await fetch(C.value.trim() || "/mcp", {
+              method: "POST",
+              headers: o,
+              body: JSON.stringify({
+                jsonrpc: "2.0",
+                id: ++T,
+                method: n,
+                ...(t === void 0 ? {} : { params: t }),
+              }),
+            }),
+            r = await e.text(),
+            i = e.headers.get("content-type")?.includes("text/event-stream")
+              ? r
+                  .split(/\r?\n/)
+                  .filter((s) => s.startsWith("data:"))
+                  .map((s) => s.slice(5).trim())
+                  .findLast(Boolean) || "{}"
+              : r,
+            c = JSON.parse(i),
+            d = e.ok ? "completed" : c.error?.message || `HTTP ${e.status}`;
+          if ((w(n, d, e.ok), !e.ok || c.error)) throw new Error(d);
+          return c;
+        }
+        function M(n) {
+          return n.result?.structuredContent ?? {};
+        }
+        function f(n) {
+          let t =
+            n.schedule ??
+            n.updatedPlan ??
+            n.currentPlan ??
+            n.newPlan ??
+            n.simulatedPlan;
+          if (
+            (typeof n.confirmationSummary == "string" &&
+              (a.textContent = n.confirmationSummary),
+            typeof n.reasoningSummary == "string" &&
+              (a.textContent = n.reasoningSummary),
+            typeof n.impact == "string" &&
+              (a.textContent = `Preview: ${n.impact}. Your saved plan is unchanged.`),
+            typeof n.completionPercentage == "number" &&
+              (a.textContent = `${n.completionPercentage}% complete \u2014 ${n.completedCount} finished and ${n.remainingCount} remaining.`),
+            !t)
+          )
+            return;
+          let o = t.riskLevel ?? "LOW";
+          ((y.textContent = o),
+            (y.className = `risk ${o.toLowerCase()}`),
+            m.replaceChildren());
+          for (let r of t.blocks ?? []) {
+            let i = document.createElement("li"),
+              c = document.createElement("time");
+            c.textContent = new Intl.DateTimeFormat(void 0, {
+              hour: "numeric",
+              minute: "2-digit",
+            }).format(new Date(r.start));
+            let d = document.createElement("div"),
+              s = document.createElement("strong");
+            s.textContent = r.title;
+            let h = document.createElement("span");
+            ((h.textContent = `${r.durationMinutes} minutes`),
+              d.append(s, h),
+              i.append(c, d),
+              m.append(i));
+          }
+          t.blocks?.length ||
+            (m.innerHTML =
+              '<li class="empty">The plan has no scheduled blocks yet.</li>');
+          let e = t.warnings ?? [];
+          e.length && (a.textContent = `${a.textContent} ${e[0]}`);
+        }
+        async function l(n, t = {}) {
+          let o = await g("tools/call", { name: n, arguments: t }),
+            e = M(o);
+          return (f(e), e);
+        }
+        async function I() {
+          try {
+            u.textContent = "Connecting\u2026";
+            let n = await g("initialize", {
+                protocolVersion: "2025-11-25",
+                capabilities: {},
+                clientInfo: {
+                  name: "deadline-zero-local-simulator",
+                  version: "1.0.0",
+                },
+              }),
+              o = (await g("tools/list")).result?.tools?.length ?? 0;
+            ((k = !0),
+              L.forEach((e) => (e.disabled = !1)),
+              (u.textContent = `Connected \u2014 protocol 2025-11-25, ${o} MCP tools available.`),
+              (u.className = "status ready"),
+              w(
+                "initialized",
+                `server accepted protocol ${n.result?.protocolVersion ?? "2025-11-25"}`,
+              ));
+          } catch (n) {
+            ((u.textContent = `${n instanceof Error ? n.message : "Connection failed"}. Check the endpoint and token.`),
+              (u.className = "status error"));
+          }
+        }
+        async function P() {
+          if (k)
+            try {
+              let n = Date.now(),
+                t = [
+                  ["Finish calculus problem set", 55, "CRITICAL", 3],
+                  ["Prepare project presentation", 45, "HIGH", 5],
+                  ["Read research chapter", 30, "MEDIUM", 7],
+                ];
+              p = [];
+              for (let [e, r, i, c] of t) {
+                let s = (
+                  await l("capture_task", {
+                    title: e,
+                    estimatedDurationMinutes: r,
+                    priority: i,
+                    flexibility: "FLEXIBLE",
+                    deadline: new Date(n + c * 36e5).toISOString(),
+                  })
+                ).task;
+                s && p.push(s);
+              }
+              let o = await l("create_plan", {
+                windowStart: new Date(n).toISOString(),
+                windowEnd: new Date(n + 8 * 36e5).toISOString(),
+              });
+              f(o);
+            } catch (n) {
+              a.textContent =
+                n instanceof Error
+                  ? n.message
+                  : "Could not create the demo plan.";
+            }
+        }
+        async function D() {
+          try {
+            let n = Date.now(),
+              t = await l("replan", {
+                reason: "A meeting just ran late",
+                unavailableStart: new Date(n + 30 * 6e4).toISOString(),
+                unavailableEnd: new Date(n + 75 * 6e4).toISOString(),
+                windowHours: 8,
+              });
+            f(t);
+          } catch (n) {
+            a.textContent =
+              n instanceof Error ? n.message : "Could not replan.";
+          }
+        }
+        E.addEventListener("click", () => void I());
+        document
+          .querySelector("#seed")
+          .addEventListener("click", () => void P());
+        document
+          .querySelector("#replan")
+          .addEventListener("click", () => void D());
+        document.querySelector("#simulate").addEventListener(
+          "click",
+          () =>
+            void (p[2]
+              ? l("simulate_change", {
+                  changeType: "skip_task",
+                  taskId: p[2].id,
+                }).catch((n) => {
+                  a.textContent =
+                    n instanceof Error ? n.message : "Could not simulate.";
+                })
+              : void 0),
+        );
+        document.querySelector("#complete").addEventListener(
+          "click",
+          () =>
+            void (p[0]
+              ? l("complete_task", { taskId: p[0].id })
+                  .then(() => l("get_progress"))
+                  .catch((n) => {
+                    a.textContent =
+                      n instanceof Error
+                        ? n.message
+                        : "Could not complete the task.";
+                  })
+              : void 0),
+        );
+        document.querySelector("#refresh").addEventListener(
+          "click",
+          () =>
+            void l("get_current_plan").catch((n) => {
+              a.textContent =
+                n instanceof Error ? n.message : "Could not refresh the plan.";
+            }),
+        );
+      })();
+    </script>
+  </body>
+</html>
