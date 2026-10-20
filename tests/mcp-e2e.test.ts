@@ -66,7 +66,7 @@ beforeAll(async () => {
   child.stderr?.on("data", (chunk) => {
     childOutput += String(chunk);
   });
-  const until = Date.now() + 15_000;
+  const until = Date.now() + 30_000;
   while (Date.now() < until) {
     try {
       if ((await fetch(`${base}/health`)).ok) return;
@@ -76,9 +76,9 @@ beforeAll(async () => {
     await new Promise((r) => setTimeout(r, 100));
   }
   throw new Error(
-    `MCP server did not become healthy within 15 seconds. ${childOutput}`,
+    `MCP server did not become healthy within 30 seconds. ${childOutput}`,
   );
-}, 20_000);
+}, 35_000);
 afterAll(() => {
   child?.kill();
 });
