@@ -6,6 +6,20 @@ This repository contains a deterministic planning service exposed over MCP Strea
 
 For the Amazon Developer Hackathon, use the local browser simulator at `/demo`. It is a real MCP client that calls this server over Streamable HTTP using protocol `2025-11-25`; it is explicitly labeled as a local Alexa+ simulation.
 
+## Hackathon Access & Evaluation Guide
+
+This project is completely self-contained and requires no paid external APIs, LLM API keys, AWS credentials, or hardware devices to evaluate.
+
+- **Simulator URL**: `http://localhost:3000/demo` (or `http://localhost:3000/demo?auto=true` for the automated walkthrough)
+- **Development Bearer Token**: `local-deadline-zero-token`
+- **MCP Endpoint**: `http://localhost:3000/mcp`
+- **Quick Start**:
+  ```powershell
+  npm install
+  npm run dev
+  ```
+  Open `http://localhost:3000/demo`, enter `local-deadline-zero-token`, and click **Connect**. You can test each MCP operation individually or click **▶ Start 2m 40s Recorded Walkthrough** for the full interactive demonstration.
+
 ## Alexa+ submission package
 
 The repository now includes a zero-cost, source-controlled submission package:

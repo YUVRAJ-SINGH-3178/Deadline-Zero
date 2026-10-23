@@ -1,18 +1,4 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="color-scheme" content="dark" />
-    <title>Deadline Zero | Local MCP Simulation</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script>
-      "use strict";
-      (() => {
-        var b = document.createElement("style");
-        b.textContent = `:root {
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Deadline Zero | Local MCP Simulation</title></head><body><div id="app"></div><script>"use strict";(()=>{var S=document.createElement("style");S.textContent=`:root {
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   color: #eef3ff;
   background: #071128;
@@ -242,239 +228,173 @@ footer {
     grid-template-columns: 82px 1fr;
   }
 }
-`;
-        document.head.appendChild(b);
-        var v = document.querySelector("#app");
-        v.innerHTML = `
-  <header><div class="eyebrow">LOCAL ALEXA+ MCP SIMULATION</div><h1>Deadline <i>Zero</i></h1><p>Turn chaos into a plan that adapts.</p></header>
-  <section class="connect card"><div><h2>Connect to your local MCP server</h2><p>This browser page sends real <code>initialize</code>, <code>tools/list</code>, and <code>tools/call</code> requests over Streamable HTTP.</p></div><div class="fields"><label>MCP endpoint<input id="endpoint" value="/mcp" inputmode="url" /></label><label>Development bearer token<input id="token" type="password" placeholder="Paste DEV_BEARER_TOKEN from .env" /></label><button id="connect">Connect</button></div><p id="connection" class="status">Not connected</p></section>
-  <section class="workspace"><div class="card controls"><h2>Demo controls</h2><p>Use the guided flow below to create an authentic, recordable MCP demonstration.</p><button id="seed" disabled>1. Capture demo tasks and make a plan</button><button id="replan" disabled>2. Add an interruption and replan</button><button id="simulate" disabled>3. Preview skipping a task</button><button id="complete" disabled>4. Complete work and show progress</button><button id="refresh" class="secondary" disabled>Refresh current plan</button></div><div class="card plan"><div class="plan-heading"><div><h2>Your adaptive plan</h2><p id="summary">Connect to begin.</p></div><span id="risk" class="risk">WAITING</span></div><ol id="schedule"><li class="empty">No plan yet.</li></ol></div></section>
-  <section class="card trace"><div><h2>Live MCP trace</h2><p>Each entry below is a real request made by this page to the local server.</p></div><ol id="trace"></ol></section>
-  <footer>Deadline Zero is an independent local simulation built for the Amazon Developer Hackathon. It is not the Alexa+ product or an Alexa certification claim.</footer>`;
-        var C = document.querySelector("#endpoint"),
-          x = document.querySelector("#token"),
-          E = document.querySelector("#connect"),
-          u = document.querySelector("#connection"),
-          a = document.querySelector("#summary"),
-          y = document.querySelector("#risk"),
-          m = document.querySelector("#schedule"),
-          S = document.querySelector("#trace"),
-          L = ["seed", "replan", "simulate", "complete", "refresh"].map((n) =>
-            document.querySelector(`#${n}`),
-          ),
-          T = 0,
-          p = [],
-          k = !1;
-        function w(n, t, o = !0) {
-          let e = document.createElement("li"),
-            r = document.createElement("strong");
-          r.textContent = n;
-          let i = document.createElement("span");
-          ((i.textContent = t),
-            (e.className = o ? "success" : "failure"),
-            e.append(r, i),
-            S.prepend(e));
-        }
-        async function g(n, t) {
-          let o = {
-            "content-type": "application/json",
-            accept: "application/json, text/event-stream",
-            "mcp-protocol-version": "2025-11-25",
-          };
-          x.value.trim() && (o.authorization = `Bearer ${x.value.trim()}`);
-          let e = await fetch(C.value.trim() || "/mcp", {
-              method: "POST",
-              headers: o,
-              body: JSON.stringify({
-                jsonrpc: "2.0",
-                id: ++T,
-                method: n,
-                ...(t === void 0 ? {} : { params: t }),
-              }),
-            }),
-            r = await e.text(),
-            i = e.headers.get("content-type")?.includes("text/event-stream")
-              ? r
-                  .split(/\r?\n/)
-                  .filter((s) => s.startsWith("data:"))
-                  .map((s) => s.slice(5).trim())
-                  .findLast(Boolean) || "{}"
-              : r,
-            c = JSON.parse(i),
-            d = e.ok ? "completed" : c.error?.message || `HTTP ${e.status}`;
-          if ((w(n, d, e.ok), !e.ok || c.error)) throw new Error(d);
-          return c;
-        }
-        function M(n) {
-          return n.result?.structuredContent ?? {};
-        }
-        function f(n) {
-          let t =
-            n.schedule ??
-            n.updatedPlan ??
-            n.currentPlan ??
-            n.newPlan ??
-            n.simulatedPlan;
-          if (
-            (typeof n.confirmationSummary == "string" &&
-              (a.textContent = n.confirmationSummary),
-            typeof n.reasoningSummary == "string" &&
-              (a.textContent = n.reasoningSummary),
-            typeof n.impact == "string" &&
-              (a.textContent = `Preview: ${n.impact}. Your saved plan is unchanged.`),
-            typeof n.completionPercentage == "number" &&
-              (a.textContent = `${n.completionPercentage}% complete \u2014 ${n.completedCount} finished and ${n.remainingCount} remaining.`),
-            !t)
-          )
-            return;
-          let o = t.riskLevel ?? "LOW";
-          ((y.textContent = o),
-            (y.className = `risk ${o.toLowerCase()}`),
-            m.replaceChildren());
-          for (let r of t.blocks ?? []) {
-            let i = document.createElement("li"),
-              c = document.createElement("time");
-            c.textContent = new Intl.DateTimeFormat(void 0, {
-              hour: "numeric",
-              minute: "2-digit",
-            }).format(new Date(r.start));
-            let d = document.createElement("div"),
-              s = document.createElement("strong");
-            s.textContent = r.title;
-            let h = document.createElement("span");
-            ((h.textContent = `${r.durationMinutes} minutes`),
-              d.append(s, h),
-              i.append(c, d),
-              m.append(i));
-          }
-          t.blocks?.length ||
-            (m.innerHTML =
-              '<li class="empty">The plan has no scheduled blocks yet.</li>');
-          let e = t.warnings ?? [];
-          e.length && (a.textContent = `${a.textContent} ${e[0]}`);
-        }
-        async function l(n, t = {}) {
-          let o = await g("tools/call", { name: n, arguments: t }),
-            e = M(o);
-          return (f(e), e);
-        }
-        async function I() {
-          try {
-            u.textContent = "Connecting\u2026";
-            let n = await g("initialize", {
-                protocolVersion: "2025-11-25",
-                capabilities: {},
-                clientInfo: {
-                  name: "deadline-zero-local-simulator",
-                  version: "1.0.0",
-                },
-              }),
-              o = (await g("tools/list")).result?.tools?.length ?? 0;
-            ((k = !0),
-              L.forEach((e) => (e.disabled = !1)),
-              (u.textContent = `Connected \u2014 protocol 2025-11-25, ${o} MCP tools available.`),
-              (u.className = "status ready"),
-              w(
-                "initialized",
-                `server accepted protocol ${n.result?.protocolVersion ?? "2025-11-25"}`,
-              ));
-          } catch (n) {
-            ((u.textContent = `${n instanceof Error ? n.message : "Connection failed"}. Check the endpoint and token.`),
-              (u.className = "status error"));
-          }
-        }
-        async function P() {
-          if (k)
-            try {
-              let n = Date.now(),
-                t = [
-                  ["Finish calculus problem set", 55, "CRITICAL", 3],
-                  ["Prepare project presentation", 45, "HIGH", 5],
-                  ["Read research chapter", 30, "MEDIUM", 7],
-                ];
-              p = [];
-              for (let [e, r, i, c] of t) {
-                let s = (
-                  await l("capture_task", {
-                    title: e,
-                    estimatedDurationMinutes: r,
-                    priority: i,
-                    flexibility: "FLEXIBLE",
-                    deadline: new Date(n + c * 36e5).toISOString(),
-                  })
-                ).task;
-                s && p.push(s);
-              }
-              let o = await l("create_plan", {
-                windowStart: new Date(n).toISOString(),
-                windowEnd: new Date(n + 8 * 36e5).toISOString(),
-              });
-              f(o);
-            } catch (n) {
-              a.textContent =
-                n instanceof Error
-                  ? n.message
-                  : "Could not create the demo plan.";
-            }
-        }
-        async function D() {
-          try {
-            let n = Date.now(),
-              t = await l("replan", {
-                reason: "A meeting just ran late",
-                unavailableStart: new Date(n + 30 * 6e4).toISOString(),
-                unavailableEnd: new Date(n + 75 * 6e4).toISOString(),
-                windowHours: 8,
-              });
-            f(t);
-          } catch (n) {
-            a.textContent =
-              n instanceof Error ? n.message : "Could not replan.";
-          }
-        }
-        E.addEventListener("click", () => void I());
-        document
-          .querySelector("#seed")
-          .addEventListener("click", () => void P());
-        document
-          .querySelector("#replan")
-          .addEventListener("click", () => void D());
-        document.querySelector("#simulate").addEventListener(
-          "click",
-          () =>
-            void (p[2]
-              ? l("simulate_change", {
-                  changeType: "skip_task",
-                  taskId: p[2].id,
-                }).catch((n) => {
-                  a.textContent =
-                    n instanceof Error ? n.message : "Could not simulate.";
-                })
-              : void 0),
-        );
-        document.querySelector("#complete").addEventListener(
-          "click",
-          () =>
-            void (p[0]
-              ? l("complete_task", { taskId: p[0].id })
-                  .then(() => l("get_progress"))
-                  .catch((n) => {
-                    a.textContent =
-                      n instanceof Error
-                        ? n.message
-                        : "Could not complete the task.";
-                  })
-              : void 0),
-        );
-        document.querySelector("#refresh").addEventListener(
-          "click",
-          () =>
-            void l("get_current_plan").catch((n) => {
-              a.textContent =
-                n instanceof Error ? n.message : "Could not refresh the plan.";
-            }),
-        );
-      })();
-    </script>
-  </body>
-</html>
+
+/* Subtitle and walkthrough overlay */
+.subtitle-bar {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(920px, calc(100% - 32px));
+  background: rgba(8, 18, 42, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(147, 197, 253, 0.35);
+  box-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.75), 0 0 24px rgba(56, 189, 248, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  z-index: 10000;
+  color: #fff;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.subtitle-progress-track {
+  height: 3px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+}
+.subtitle-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  transition: width 0.3s linear;
+}
+.subtitle-content {
+  padding: 12px 20px;
+}
+.subtitle-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.subtitle-time {
+  font-family: ui-monospace, monospace;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+.subtitle-tag {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+.subtitle-main {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: -0.01em;
+}
+.subtitle-narration {
+  font-size: 0.92rem;
+  color: #cbd5e1;
+  font-style: italic;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+.highlight-target {
+  outline: 2px solid #38bdf8 !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 28px rgba(56, 189, 248, 0.5) !important;
+  transition: outline 0.3s ease, box-shadow 0.3s ease;
+}
+.walkthrough-bar {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+  align-items: center;
+}
+.walkthrough-btn {
+  background: linear-gradient(135deg, #38bdf8, #6366f1);
+  color: #030712;
+  font-weight: 800;
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.walkthrough-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
+}
+
+`;document.head.appendChild(S);var _=document.querySelector("#app");_.innerHTML=`
+  <header>
+    <div class="eyebrow">LOCAL ALEXA+ MCP SIMULATION</div>
+    <h1>Deadline <i>Zero</i></h1>
+    <p>Turn chaos into a plan that adapts.</p>
+  </header>
+  <section class="connect card">
+    <div>
+      <h2>Connect to your local MCP server</h2>
+      <p>This browser page sends real <code>initialize</code>, <code>tools/list</code>, and <code>tools/call</code> requests over Streamable HTTP.</p>
+      <div class="walkthrough-bar">
+        <button id="walkthrough" class="walkthrough-btn" type="button">\u25B6 Start 2m 40s Recorded Walkthrough</button>
+      </div>
+    </div>
+    <div class="fields">
+      <label>MCP endpoint
+        <input id="endpoint" value="/mcp" inputmode="url" />
+      </label>
+      <label>Development bearer token
+        <input id="token" type="password" placeholder="Paste DEV_BEARER_TOKEN from .env" />
+      </label>
+      <button id="connect">Connect</button>
+    </div>
+    <p id="connection" class="status">Not connected</p>
+  </section>
+  <section class="workspace">
+    <div class="card controls">
+      <h2>Demo controls</h2>
+      <p>Use the guided flow below to create an authentic, recordable MCP demonstration.</p>
+      <button id="seed" disabled>1. Capture demo tasks and make a plan</button>
+      <button id="replan" disabled>2. Add an interruption and replan</button>
+      <button id="simulate" disabled>3. Preview skipping a task</button>
+      <button id="complete" disabled>4. Complete work and show progress</button>
+      <button id="refresh" class="secondary" disabled>Refresh current plan</button>
+    </div>
+    <div class="card plan">
+      <div class="plan-heading">
+        <div>
+          <h2>Your adaptive plan</h2>
+          <p id="summary">Connect to begin.</p>
+        </div>
+        <span id="risk" class="risk">WAITING</span>
+      </div>
+      <ol id="schedule"><li class="empty">No plan yet.</li></ol>
+    </div>
+  </section>
+  <section class="card trace">
+    <div>
+      <h2>Live MCP trace</h2>
+      <p>Each entry below is a real request made by this page to the local server.</p>
+    </div>
+    <ol id="trace"></ol>
+  </section>
+  <footer>Deadline Zero is an independent local simulation built for the Amazon Developer Hackathon. It is not the Alexa+ product or an Alexa certification claim.</footer>
+
+  <div id="subtitle-bar" class="subtitle-bar" aria-live="polite">
+    <div class="subtitle-progress-track">
+      <div id="subtitle-progress-fill" class="subtitle-progress-fill"></div>
+    </div>
+    <div class="subtitle-content">
+      <div class="subtitle-header">
+        <span id="subtitle-time" class="subtitle-time">0:00</span>
+        <span id="subtitle-tag" class="subtitle-tag">LOCAL ALEXA+ MCP SIMULATION</span>
+        <span id="subtitle-main" class="subtitle-main">Deadline Zero \u2014 Local Alexa+ MCP Simulation</span>
+      </div>
+      <div id="subtitle-narration" class="subtitle-narration">\u201CDeadline Zero turns a messy list of deadlines into a realistic plan that adapts when life changes.\u201D</div>
+    </div>
+  </div>`;var N=document.querySelector("#endpoint"),k=document.querySelector("#token"),W=document.querySelector("#connect"),g=document.querySelector("#connection"),l=document.querySelector("#summary"),L=document.querySelector("#risk"),b=document.querySelector("#schedule"),Z=document.querySelector("#trace"),h=document.querySelector("#walkthrough"),E=document.querySelector("#subtitle-progress-fill"),T=document.querySelector("#subtitle-time"),M=document.querySelector("#subtitle-main"),x=document.querySelector("#subtitle-narration"),P=document.querySelector("#subtitle-tag"),B=["seed","replan","simulate","complete","refresh"].map(n=>document.querySelector(`#${n}`)),j=0,m=[],H=!1,f=null;function r(n){if(f&&(f.classList.remove("highlight-target"),f=null),!n)return;let t=typeof n=="string"?document.querySelector(n):n;t&&(t.classList.add("highlight-target"),f=t,t.scrollIntoView({behavior:"smooth",block:"nearest"}))}function s(n,t="",a="LOCAL ALEXA+ MCP SIMULATION"){M&&(M.textContent=n),x&&(x.textContent=t,x.style.display=t?"block":"none"),P&&(P.textContent=a)}function D(n,t,a=!0){let e=document.createElement("li"),o=document.createElement("strong");o.textContent=n;let i=document.createElement("span");i.textContent=t,e.className=a?"success":"failure",e.append(o,i),Z.prepend(e)}async function y(n,t){let a={"content-type":"application/json",accept:"application/json, text/event-stream","mcp-protocol-version":"2025-11-25"};k.value.trim()&&(a.authorization=`Bearer ${k.value.trim()}`);let e=await fetch(N.value.trim()||"/mcp",{method:"POST",headers:a,body:JSON.stringify({jsonrpc:"2.0",id:++j,method:n,...t===void 0?{}:{params:t}})}),o=await e.text(),i=e.headers.get("content-type")?.includes("text/event-stream")?o.split(/\r?\n/).filter(d=>d.startsWith("data:")).map(d=>d.slice(5).trim()).findLast(Boolean)||"{}":o,c=JSON.parse(i),u=e.ok?"completed":c.error?.message||`HTTP ${e.status}`;if(D(n,u,e.ok),!e.ok||c.error)throw new Error(u);return c}function V(n){return n.result?.structuredContent??{}}function v(n){let t=n.schedule??n.updatedPlan??n.currentPlan??n.newPlan??n.simulatedPlan;if(typeof n.confirmationSummary=="string"&&(l.textContent=n.confirmationSummary),typeof n.reasoningSummary=="string"&&(l.textContent=n.reasoningSummary),typeof n.impact=="string"&&(l.textContent=`Preview: ${n.impact}. Your saved plan is unchanged.`),typeof n.completionPercentage=="number"&&(l.textContent=`${n.completionPercentage}% complete \u2014 ${n.completedCount} finished and ${n.remainingCount} remaining.`),!t)return;let a=t.riskLevel??"LOW";L.textContent=a,L.className=`risk ${a.toLowerCase()}`,b.replaceChildren();for(let o of t.blocks??[]){let i=document.createElement("li"),c=document.createElement("time");c.textContent=new Intl.DateTimeFormat(void 0,{hour:"numeric",minute:"2-digit"}).format(new Date(o.start));let u=document.createElement("div"),d=document.createElement("strong");d.textContent=o.title;let C=document.createElement("span");C.textContent=`${o.durationMinutes} minutes`,u.append(d,C),i.append(c,u),b.append(i)}t.blocks?.length||(b.innerHTML='<li class="empty">The plan has no scheduled blocks yet.</li>');let e=t.warnings??[];e.length&&(l.textContent=`${l.textContent} ${e[0]}`)}async function p(n,t={}){let a=await y("tools/call",{name:n,arguments:t}),e=V(a);return v(e),e}async function z(){try{g.textContent="Connecting\u2026";let n=await y("initialize",{protocolVersion:"2025-11-25",capabilities:{},clientInfo:{name:"deadline-zero-local-simulator",version:"1.0.0"}}),a=(await y("tools/list")).result?.tools?.length??0;H=!0,B.forEach(e=>e.disabled=!1),g.textContent=`Connected \u2014 protocol 2025-11-25, ${a} MCP tools available.`,g.className="status ready",D("initialized",`server accepted protocol ${n.result?.protocolVersion??"2025-11-25"}`)}catch(n){g.textContent=`${n instanceof Error?n.message:"Connection failed"}. Check the endpoint and token.`,g.className="status error"}}async function q(){if(H)try{let n=Date.now(),t=[["Finish calculus problem set",55,"CRITICAL",3],["Prepare project presentation",45,"HIGH",5],["Read research chapter",30,"MEDIUM",7]];m=[];for(let[e,o,i,c]of t){let d=(await p("capture_task",{title:e,estimatedDurationMinutes:o,priority:i,flexibility:"FLEXIBLE",deadline:new Date(n+c*36e5).toISOString()})).task;d&&m.push(d)}let a=await p("create_plan",{windowStart:new Date(n).toISOString(),windowEnd:new Date(n+8*36e5).toISOString()});v(a)}catch(n){l.textContent=n instanceof Error?n.message:"Could not create the demo plan."}}async function A(){try{let n=Date.now(),t=await p("replan",{reason:"A meeting just ran late",unavailableStart:new Date(n+30*6e4).toISOString(),unavailableEnd:new Date(n+75*6e4).toISOString(),windowHours:8});v(t)}catch(n){l.textContent=n instanceof Error?n.message:"Could not replan."}}async function R(){if(m[2])try{await p("simulate_change",{changeType:"skip_task",taskId:m[2].id})}catch(n){l.textContent=n instanceof Error?n.message:"Could not simulate."}}async function O(){if(m[0])try{await p("complete_task",{taskId:m[0].id}),await p("get_progress")}catch(n){l.textContent=n instanceof Error?n.message:"Could not complete the task."}}W.addEventListener("click",()=>void z());document.querySelector("#seed").addEventListener("click",()=>void q());document.querySelector("#replan").addEventListener("click",()=>void A());document.querySelector("#simulate").addEventListener("click",()=>void R());document.querySelector("#complete").addEventListener("click",()=>void O());document.querySelector("#refresh").addEventListener("click",()=>void p("get_current_plan").catch(n=>{l.textContent=n instanceof Error?n.message:"Could not refresh the plan."}));var w=!1;async function $(){if(w)return;w=!0,h.disabled=!0,h.textContent="Walkthrough Running\u2026";let n=160,t=0,a=setInterval(()=>{t+=1;let o=Math.floor(t/60),i=t%60;if(T&&(T.textContent=`${o}:${i<10?"0":""}${i}`),E){let c=Math.min(100,t/n*100);E.style.width=`${c}%`}t>=n&&clearInterval(a)},1e3),e=o=>new Promise(i=>setTimeout(i,o));try{r("header"),s("Deadline Zero \u2014 Local Alexa+ MCP Simulation",""),await e(8e3),r(".connect"),s("Deadline Zero \u2014 Local Alexa+ MCP Simulation","\u201CDeadline Zero turns a messy list of deadlines into a realistic plan that adapts when life changes.\u201D"),k.value="local-deadline-zero-token",await e(1e4),r("#connect"),s("Real MCP connection: initialize + tools/list","Connecting to local Streamable HTTP server over MCP protocol 2025-11-25..."),await z(),await e(12e3),r("#connection"),s("Real MCP connection: initialize + tools/list","\u201CThis browser simulator is a real MCP client. It connects to the local Streamable HTTP server using MCP protocol 2025-11-25 and discovers 13 planning tools.\u201D"),await e(15e3),r("#seed"),s("Capture tasks \u2192 create a deadline-aware schedule","Capturing conversational tasks and creating an initial schedule..."),await q(),await e(2e4),r(".plan"),s("Capture tasks \u2192 create a deadline-aware schedule","\u201CDeadline Zero captures deadlines, time estimates, priority, and flexibility. The deterministic planner builds a schedule around those constraints.\u201D"),await e(15e3),r("#replan"),s("A meeting runs late \u2192 the plan adapts","Simulating a late meeting interruption and recalculating..."),await A(),await e(2e4),r(".plan"),s("A meeting runs late \u2192 the plan adapts","\u201CWhen an interruption appears, Deadline Zero replans the remaining work instead of leaving the user with an outdated to-do list.\u201D"),await e(12e3),r("#simulate"),s("What-if simulation: preview impact without changing the saved plan","Previewing impact of skipping a task without modifying saved data..."),await R(),await e(16e3),r("#summary"),s("What-if simulation: preview impact without changing the saved plan","\u201CThe user can explore a risky decision before committing to it. This simulation does not alter the real plan.\u201D"),await e(12e3),r("#complete"),s("Complete work \u2192 refresh plan \u2192 recommend what matters next","Marking task complete and retrieving updated progress..."),await O(),await e(15e3),r(".trace"),s("Live trace: initialize, tools/list, and tools/call","Live trace: initialize, tools/list, and tools/call"),document.querySelector(".trace")?.scrollIntoView({behavior:"smooth",block:"start"}),await e(13e3),r(".plan"),s("Turn chaos into a plan that adapts.","\u201CDeadline Zero combines conversational task capture, deterministic scheduling, and adaptive replanning so people always know the next best action.\u201D"),document.querySelector(".plan")?.scrollIntoView({behavior:"smooth",block:"start"}),await e(1e4),r(".plan"),s("Turn chaos into a plan that adapts.",""),await e(3e3)}finally{clearInterval(a),w=!1,h.disabled=!1,h.textContent="\u25B6 Replay Walkthrough"}}h.addEventListener("click",()=>void $());var I=new URLSearchParams(window.location.search);(I.get("auto")==="true"||I.get("walkthrough")==="1")&&setTimeout(()=>{$()},1e3);})();
+</script></body></html>
