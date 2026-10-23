@@ -240,7 +240,9 @@ footer {
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(147, 197, 253, 0.35);
-  box-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.75), 0 0 24px rgba(56, 189, 248, 0.2);
+  box-shadow:
+    0 16px 48px -8px rgba(0, 0, 0, 0.75),
+    0 0 24px rgba(56, 189, 248, 0.2);
   border-radius: 16px;
   overflow: hidden;
   z-index: 10000;
@@ -303,7 +305,9 @@ footer {
   outline: 2px solid #38bdf8 !important;
   outline-offset: 4px !important;
   box-shadow: 0 0 28px rgba(56, 189, 248, 0.5) !important;
-  transition: outline 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    outline 0.3s ease,
+    box-shadow 0.3s ease;
 }
 .walkthrough-bar {
   display: flex;
@@ -328,4 +332,3 @@ footer {
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(56, 189, 248, 0.45);
 }
-

@@ -1,0 +1,6 @@
+node_modules/
+dist/
+coverage/
+apps/mcp-app/build/
+apps/simulator/build/
+package-lock.json

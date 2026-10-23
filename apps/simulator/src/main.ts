@@ -87,11 +87,16 @@ const summary = document.querySelector<HTMLElement>("#summary")!;
 const risk = document.querySelector<HTMLElement>("#risk")!;
 const schedule = document.querySelector<HTMLOListElement>("#schedule")!;
 const trace = document.querySelector<HTMLOListElement>("#trace")!;
-const walkthroughBtn = document.querySelector<HTMLButtonElement>("#walkthrough")!;
-const subtitleProgress = document.querySelector<HTMLElement>("#subtitle-progress-fill")!;
+const walkthroughBtn =
+  document.querySelector<HTMLButtonElement>("#walkthrough")!;
+const subtitleProgress = document.querySelector<HTMLElement>(
+  "#subtitle-progress-fill",
+)!;
 const subtitleTime = document.querySelector<HTMLElement>("#subtitle-time")!;
 const subtitleMain = document.querySelector<HTMLElement>("#subtitle-main")!;
-const subtitleNarration = document.querySelector<HTMLElement>("#subtitle-narration")!;
+const subtitleNarration = document.querySelector<HTMLElement>(
+  "#subtitle-narration",
+)!;
 const subtitleTag = document.querySelector<HTMLElement>("#subtitle-tag")!;
 
 const buttons = ["seed", "replan", "simulate", "complete", "refresh"].map(
@@ -108,7 +113,10 @@ function highlight(selector: string | HTMLElement | null) {
     currentHighlight = null;
   }
   if (!selector) return;
-  const el = typeof selector === "string" ? document.querySelector<HTMLElement>(selector) : selector;
+  const el =
+    typeof selector === "string"
+      ? document.querySelector<HTMLElement>(selector)
+      : selector;
   if (el) {
     el.classList.add("highlight-target");
     currentHighlight = el;
@@ -116,7 +124,11 @@ function highlight(selector: string | HTMLElement | null) {
   }
 }
 
-function setSubtitle(mainText: string, narrationText = "", tag = "LOCAL ALEXA+ MCP SIMULATION") {
+function setSubtitle(
+  mainText: string,
+  narrationText = "",
+  tag = "LOCAL ALEXA+ MCP SIMULATION",
+) {
   if (subtitleMain) subtitleMain.textContent = mainText;
   if (subtitleNarration) {
     subtitleNarration.textContent = narrationText;
@@ -338,14 +350,25 @@ async function completeWork() {
 }
 
 connect.addEventListener("click", () => void connectServer());
-document.querySelector("#seed")!.addEventListener("click", () => void seedDemo());
-document.querySelector("#replan")!.addEventListener("click", () => void replanDay());
-document.querySelector("#simulate")!.addEventListener("click", () => void simulateSkip());
-document.querySelector("#complete")!.addEventListener("click", () => void completeWork());
-document.querySelector("#refresh")!.addEventListener("click", () =>
-  void call("get_current_plan").catch((error: unknown) => {
-    summary.textContent = error instanceof Error ? error.message : "Could not refresh the plan.";
-  })
+document
+  .querySelector("#seed")!
+  .addEventListener("click", () => void seedDemo());
+document
+  .querySelector("#replan")!
+  .addEventListener("click", () => void replanDay());
+document
+  .querySelector("#simulate")!
+  .addEventListener("click", () => void simulateSkip());
+document
+  .querySelector("#complete")!
+  .addEventListener("click", () => void completeWork());
+document.querySelector("#refresh")!.addEventListener(
+  "click",
+  () =>
+    void call("get_current_plan").catch((error: unknown) => {
+      summary.textContent =
+        error instanceof Error ? error.message : "Could not refresh the plan.";
+    }),
 );
 
 // --- 2m 40s Automated Walkthrough Runner ---
@@ -363,7 +386,8 @@ async function runWalkthrough() {
     elapsed += 1;
     const mins = Math.floor(elapsed / 60);
     const secs = elapsed % 60;
-    if (subtitleTime) subtitleTime.textContent = `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+    if (subtitleTime)
+      subtitleTime.textContent = `${mins}:${secs < 10 ? "0" : ""}${secs}`;
     if (subtitleProgress) {
       const pct = Math.min(100, (elapsed / totalDuration) * 100);
       subtitleProgress.style.width = `${pct}%`;
@@ -373,7 +397,8 @@ async function runWalkthrough() {
     }
   }, 1000);
 
-  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
   try {
     // 0:00–0:08 (8s) - Simulator title screen
@@ -385,7 +410,7 @@ async function runWalkthrough() {
     highlight(".connect");
     setSubtitle(
       "Deadline Zero — Local Alexa+ MCP Simulation",
-      "“Deadline Zero turns a messy list of deadlines into a realistic plan that adapts when life changes.”"
+      "“Deadline Zero turns a messy list of deadlines into a realistic plan that adapts when life changes.”",
     );
     token.value = "local-deadline-zero-token";
     await sleep(10000);
@@ -394,7 +419,7 @@ async function runWalkthrough() {
     highlight("#connect");
     setSubtitle(
       "Real MCP connection: initialize + tools/list",
-      "Connecting to local Streamable HTTP server over MCP protocol 2025-11-25..."
+      "Connecting to local Streamable HTTP server over MCP protocol 2025-11-25...",
     );
     await connectServer();
     await sleep(12000);
@@ -403,7 +428,7 @@ async function runWalkthrough() {
     highlight("#connection");
     setSubtitle(
       "Real MCP connection: initialize + tools/list",
-      "“This browser simulator is a real MCP client. It connects to the local Streamable HTTP server using MCP protocol 2025-11-25 and discovers 13 planning tools.”"
+      "“This browser simulator is a real MCP client. It connects to the local Streamable HTTP server using MCP protocol 2025-11-25 and discovers 13 planning tools.”",
     );
     await sleep(15000);
 
@@ -411,7 +436,7 @@ async function runWalkthrough() {
     highlight("#seed");
     setSubtitle(
       "Capture tasks → create a deadline-aware schedule",
-      "Capturing conversational tasks and creating an initial schedule..."
+      "Capturing conversational tasks and creating an initial schedule...",
     );
     await seedDemo();
     await sleep(20000);
@@ -420,7 +445,7 @@ async function runWalkthrough() {
     highlight(".plan");
     setSubtitle(
       "Capture tasks → create a deadline-aware schedule",
-      "“Deadline Zero captures deadlines, time estimates, priority, and flexibility. The deterministic planner builds a schedule around those constraints.”"
+      "“Deadline Zero captures deadlines, time estimates, priority, and flexibility. The deterministic planner builds a schedule around those constraints.”",
     );
     await sleep(15000);
 
@@ -428,7 +453,7 @@ async function runWalkthrough() {
     highlight("#replan");
     setSubtitle(
       "A meeting runs late → the plan adapts",
-      "Simulating a late meeting interruption and recalculating..."
+      "Simulating a late meeting interruption and recalculating...",
     );
     await replanDay();
     await sleep(20000);
@@ -437,7 +462,7 @@ async function runWalkthrough() {
     highlight(".plan");
     setSubtitle(
       "A meeting runs late → the plan adapts",
-      "“When an interruption appears, Deadline Zero replans the remaining work instead of leaving the user with an outdated to-do list.”"
+      "“When an interruption appears, Deadline Zero replans the remaining work instead of leaving the user with an outdated to-do list.”",
     );
     await sleep(12000);
 
@@ -445,7 +470,7 @@ async function runWalkthrough() {
     highlight("#simulate");
     setSubtitle(
       "What-if simulation: preview impact without changing the saved plan",
-      "Previewing impact of skipping a task without modifying saved data..."
+      "Previewing impact of skipping a task without modifying saved data...",
     );
     await simulateSkip();
     await sleep(16000);
@@ -454,7 +479,7 @@ async function runWalkthrough() {
     highlight("#summary");
     setSubtitle(
       "What-if simulation: preview impact without changing the saved plan",
-      "“The user can explore a risky decision before committing to it. This simulation does not alter the real plan.”"
+      "“The user can explore a risky decision before committing to it. This simulation does not alter the real plan.”",
     );
     await sleep(12000);
 
@@ -462,7 +487,7 @@ async function runWalkthrough() {
     highlight("#complete");
     setSubtitle(
       "Complete work → refresh plan → recommend what matters next",
-      "Marking task complete and retrieving updated progress..."
+      "Marking task complete and retrieving updated progress...",
     );
     await completeWork();
     await sleep(15000);
@@ -471,25 +496,28 @@ async function runWalkthrough() {
     highlight(".trace");
     setSubtitle(
       "Live trace: initialize, tools/list, and tools/call",
-      "Live trace: initialize, tools/list, and tools/call"
+      "Live trace: initialize, tools/list, and tools/call",
     );
-    document.querySelector(".trace")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .querySelector(".trace")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
     await sleep(13000);
 
     // 2:48–2:58 (10s) - Return focus to the plan
     highlight(".plan");
     setSubtitle(
       "Turn chaos into a plan that adapts.",
-      "“Deadline Zero combines conversational task capture, deterministic scheduling, and adaptive replanning so people always know the next best action.”"
+      "“Deadline Zero combines conversational task capture, deterministic scheduling, and adaptive replanning so people always know the next best action.”",
     );
-    document.querySelector(".plan")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .querySelector(".plan")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
     await sleep(10000);
 
     // 2:58–3:00 (Hold on final plan)
     highlight(".plan");
     setSubtitle("Turn chaos into a plan that adapts.", "");
     await sleep(3000);
-
   } finally {
     clearInterval(timer);
     walkthroughRunning = false;
